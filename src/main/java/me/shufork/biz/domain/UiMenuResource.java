@@ -34,6 +34,6 @@ public class UiMenuResource {
     @Column(name = "f_ui_node",nullable = false,length = 64)
     private String uiNode;
 
-    @Column(name = "f_ui_parent_node",nullable = false,length = 64)
+    @Column(name = "f_ui_parent_node",length = 64)
     private String uiParentNode;
 }

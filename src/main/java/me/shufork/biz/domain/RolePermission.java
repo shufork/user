@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @Entity
-@Table(name = "t_role_authority")
+@Table(name = "t_role_permission")
 @DynamicInsert
 @DynamicUpdate
 public class RolePermission implements Serializable {

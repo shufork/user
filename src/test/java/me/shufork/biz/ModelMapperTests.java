@@ -61,8 +61,7 @@ public class ModelMapperTests {
         user.setEmail("john@gmail.com");
         user.setLoginName("bobo");
         user.setPassword("111");
-        user.setStatus(UserStatusEnums.BANNED);
-        //user.addRoleAuthority(rolePermission);
+        user.setStatus(UserStatusEnums.LOCKED);
         user.setCellPhoneNumber("18012345678");
 
         final UserDto userDto = modelMapper.map(user,UserDto.class);
@@ -73,8 +72,6 @@ public class ModelMapperTests {
         assertThat(userDto.getLoginName()).isEqualTo(user.getLoginName());
         assertThat(userDto.getPassword()).isEqualTo(user.getPassword());
 
-        assertThat(userDto.getAuthorities().size()).isEqualTo(1);
-        assertThat(userDto.getAuthorities().get(0).getAuthority()).isEqualTo(role.getName());
 
     }
 }

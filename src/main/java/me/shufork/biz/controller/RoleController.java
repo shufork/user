@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import me.shufork.biz.service.UserService;
 import me.shufork.common.dto.user.RoleDto;
-import me.shufork.common.dto.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

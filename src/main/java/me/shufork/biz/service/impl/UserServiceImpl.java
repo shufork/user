@@ -140,10 +140,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow (()->new RecordNotFoundException("user id",userId));
 
         UserDto userDto = null;
-        if(user.getStatus() == UserStatusEnums.REGULAR){
+        if(user.getStatus() == UserStatusEnums.ACTIVATED){
             return userDto;
         }
-        user.setStatus(UserStatusEnums.REGULAR);
+        user.setStatus(UserStatusEnums.ACTIVATED);
         userDto = modelMapper.map(userRepository.save(user),UserDto.class);
 
         final UserActivatePayload payload = new UserActivatePayload();

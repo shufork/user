@@ -7,7 +7,6 @@ import me.shufork.common.dto.user.UserDto;
 import me.shufork.common.exceptions.RecordNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 

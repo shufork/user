@@ -1,7 +1,5 @@
 package me.shufork.biz;
 
-import me.shufork.common.mq.processer.UserActivatedProcessor;
-import me.shufork.common.mq.processer.UserCreatedProcessor;
 import me.shufork.common.mq.source.UserActivatedSource;
 import me.shufork.common.mq.source.UserCreatedSource;
 import org.springframework.boot.SpringApplication;

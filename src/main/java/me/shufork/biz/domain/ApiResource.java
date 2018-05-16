@@ -9,7 +9,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name="t_ui_menu_resource")
+@Table(name="t_api_resource")
 @DynamicInsert
 @DynamicUpdate
 public class ApiResource {
@@ -29,7 +29,7 @@ public class ApiResource {
     @Enumerated(EnumType.STRING)
     private ApiMethod method;
 
-    @Column(name = "f_api_url",nullable = false)
-    private String url;
+    @Column(name = "f_api_path",nullable = false)
+    private String path;
 
 }
