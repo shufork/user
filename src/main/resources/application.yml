@@ -1,0 +1,88 @@
+###==========================================================================================###
+## 部署
+#  重要的外部参数
+#  --eureka.client.service-url.defaultZone="http://192.168.0.166:8761/eureka/,http://192.168.0.166:8762/eureka/"
+#  --spring.cloud.config.label
+#  --spring.cloud.config.profile
+#  --eureka.instance.ip-address
+#
+#  可选的外部参数
+#  -Dspring.cloud.inetutils.preferredNetworks=192.168.0
+#  --spring.profiles.active=fast-discovery
+#
+#  例子
+#  --eureka.instance.ip-address=192.168.0.164
+#  --eureka.client.service-url.defaultZone="http://192.168.0.166:8761/eureka/"
+#  --spring.cloud.config.label=laptop
+#  --spring.cloud.config.profile=dev
+#  --spring.profiles.active=dev,fast-discovery
+#
+###==========================================================================================###
+
+
+server:
+  port: 18100
+
+logging:
+  level:
+    #org.springframework.cache: DEBUG
+    org.springframework.amqp.rabbit: INFO
+
+info:
+  version: '@project.version@'
+
+
+liquibase:
+  change-log: classpath:db/changelog/changelog.xml
+  #default-schema: db_user
+  #drop-first: false
+  #enabled: true
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  messages:
+    basename: i18n/messages
+    cache-seconds: 3600
+  cloud:
+#    inetutils:
+#      preferredNetworks: # TODO : overwrite
+#        - 192.168
+#        - 10.11
+    stream:
+      bindings:
+        user_created_output:
+          binder: rabbit
+          destination: userCreated
+          #group: default
+          content-type: application/json
+          producer:
+            required-groups: default
+        user_activated_output:
+          binder: rabbit
+          destination: userActivated
+          #group: default
+          content-type: application/json
+          producer:
+            required-groups: default
+
+---
+spring:
+  profiles: dev
+
+---
+spring:
+  profiles: test
+
+---
+spring:
+  profiles: fast-discovery
+
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
