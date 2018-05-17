@@ -17,9 +17,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(
         classes = {ModelMapperConfiguration.class},
@@ -52,7 +49,7 @@ public class ModelMapperTests {
 
         final RolePermission rolePermission = new RolePermission();
         rolePermission.setId("user-authority-1");
-        rolePermission.setRole(role.getId());
+        rolePermission.setRoleId(role.getId());
 
         final User user = new User();
         user.setId("user-1");
@@ -62,15 +59,14 @@ public class ModelMapperTests {
         user.setLoginName("bobo");
         user.setPassword("111");
         user.setStatus(UserStatusEnums.LOCKED);
-        user.setCellPhoneNumber("18012345678");
+        user.setMobile("18012345678");
 
         final UserDto userDto = modelMapper.map(user,UserDto.class);
         assertThat(userDto.getId()).isEqualTo(user.getId());
-        assertThat(userDto.getCellPhoneNumber()).isEqualTo(user.getCellPhoneNumber());
+        assertThat(userDto.getMobile()).isEqualTo(user.getMobile());
         assertThat(userDto.getDisplayName()).isEqualTo(user.getDisplayName());
         assertThat(userDto.getEmail()).isEqualTo(user.getEmail());
         assertThat(userDto.getLoginName()).isEqualTo(user.getLoginName());
-        assertThat(userDto.getPassword()).isEqualTo(user.getPassword());
 
 
     }

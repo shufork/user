@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import me.shufork.biz.service.UserService;
 import me.shufork.common.dto.user.CreateUserDto;
+import me.shufork.common.dto.user.UserAuthDto;
 import me.shufork.common.dto.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "激活用户")
-    @RequestMapping(value = "/users/activation", method = RequestMethod.POST)
+    @RequestMapping(value = "/users/active", method = RequestMethod.POST)
     public void activateUser(@ApiParam(name = "user-id", value = "用户UID", required = true) @RequestParam(name="user-id") String userId){
         userService.activateUser(userId);
     }
@@ -46,6 +47,12 @@ public class UserController {
         return userService.getUserByLoginName(loginName);
     }
 
+
+    @ApiOperation(value = "取用户认证信息")
+    @RequestMapping(value = "/users/auth/name", method = RequestMethod.GET)
+    public UserAuthDto loadUserAuthByLoginName(@ApiParam(name = "login-name", value = "用户登陆名称", required = true) @RequestParam(name="login-name") String loginName){
+        return userService.getUserAuthByLoginName(loginName);
+    }
     @RequestMapping(value = "/users/grant", method = RequestMethod.PUT)
     @ApiOperation(value = "重置用户权限")
     public void grantAuthorities(

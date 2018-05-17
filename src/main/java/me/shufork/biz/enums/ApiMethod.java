@@ -1,4 +1,4 @@
-package me.shufork.biz.domain;
+package me.shufork.biz.enums;
 
 public enum ApiMethod {
 

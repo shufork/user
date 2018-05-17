@@ -23,7 +23,7 @@ public class RoleController {
 
     @ApiOperation(value = "取角色信息")
     @RequestMapping(value = "/roles/name", method = RequestMethod.GET)
-    public RoleDto loadUserByLoginName(@ApiParam(name = "name", value = "角色名称", required = true) @RequestParam(name="name") String name){
+    public RoleDto loadRoleByName(@ApiParam(name = "name", value = "角色名称", required = true) @RequestParam(name="name") String name){
         return userService.findRoleByRoleName(name);
     }
 }

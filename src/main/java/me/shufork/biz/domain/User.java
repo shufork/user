@@ -46,8 +46,8 @@ public class User implements Serializable{
     @Column(name = "f_email",length = 64)
     private String email;
 
-    @Column(name = "f_cell_phone_number",length = 20)
-    private String cellPhoneNumber;
+    @Column(name = "f_mobile",length = 20)
+    private String mobile;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "f_status",nullable = false)

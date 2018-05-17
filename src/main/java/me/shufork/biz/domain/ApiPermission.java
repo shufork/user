@@ -27,7 +27,6 @@ public class ApiPermission {
     @Column(name = "z_version")
     private Long version;
 
-
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
@@ -35,8 +34,8 @@ public class ApiPermission {
     private String id;
 
     @Column(name = "f_role_ref",nullable = false,length = 64)
-    private String role;
+    private String roleId;
 
     @Column(name = "f_api_ref",nullable = false,length = 64)
-    private String apiResource;
+    private String apiResourceId;
 }

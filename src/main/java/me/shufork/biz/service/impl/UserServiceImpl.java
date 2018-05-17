@@ -2,16 +2,19 @@ package me.shufork.biz.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import me.shufork.biz.cache.dao.RoleCache;
+import me.shufork.biz.constants.BuildInRoleNames;
 import me.shufork.biz.domain.Role;
+import me.shufork.biz.domain.RolePermission;
 import me.shufork.biz.domain.User;
 import me.shufork.biz.repository.RolePermissionRepository;
+import me.shufork.biz.repository.RoleRepository;
 import me.shufork.biz.repository.UserRepository;
 import me.shufork.biz.service.UserService;
 import me.shufork.common.constants.CacheNameConstants;
 import me.shufork.common.dto.user.CreateUserDto;
 import me.shufork.common.dto.user.RoleDto;
+import me.shufork.common.dto.user.UserAuthDto;
 import me.shufork.common.dto.user.UserDto;
-import me.shufork.common.enums.BuildInRoleNameEnums;
 import me.shufork.common.enums.UserStatusEnums;
 import me.shufork.common.exceptions.RecordNotFoundException;
 import me.shufork.common.mq.payload.UserActivatePayload;
@@ -61,6 +64,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RolePermissionRepository rolePermissionRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     /**
      * Self-autowired reference to proxified bean of this class.
      */
@@ -88,12 +94,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public void loadDefaultRole(){
-        Role role = roleCache.preLoadRole(BuildInRoleNameEnums.ROLE_USER.getValue());
+        Role role = roleCache.preLoadRole(BuildInRoleNames.ROLE_USER.getValue());
         if(role == null){
             log.error("can not load default role({}) for new user,check database init data ",
-                    BuildInRoleNameEnums.ROLE_USER.getValue());
+                    BuildInRoleNames.ROLE_USER.getValue());
         }else{
-            log.info("load default role({}) for new user",BuildInRoleNameEnums.ROLE_USER.getValue());
+            log.info("load default role({}) for new user",BuildInRoleNames.ROLE_USER.getValue());
         }
         defaultRole.set(role);
     }
@@ -113,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
         final User user = modelMapper.map(createUserDto,User.class);
 
-        user.setStatus(UserStatusEnums.CREATED);
+        user.setStatus(UserStatus.CREATED);
         user.setPassword(userPasswordEncoder.encode(createUserDto.getPassword()));
         user.addRoleAuthority(rolePermission);
 
@@ -140,10 +146,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow (()->new RecordNotFoundException("user id",userId));
 
         UserDto userDto = null;
-        if(user.getStatus() == UserStatusEnums.ACTIVATED){
+        if(user.getStatus() == UserStatusEnums.ACTIVE){
             return userDto;
         }
-        user.setStatus(UserStatusEnums.ACTIVATED);
+        user.setStatus(UserStatusEnums.ACTIVE);
         userDto = modelMapper.map(userRepository.save(user),UserDto.class);
 
         final UserActivatePayload payload = new UserActivatePayload();
@@ -153,6 +159,7 @@ public class UserServiceImpl implements UserService {
         return userDto;
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = {CacheNameConstants.USER_DTO_BY_ID},key = "'user:id:' + #userId")
     @Override
     public UserDto getUserById(String userId) {
@@ -161,12 +168,25 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user,UserDto.class);
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = {CacheNameConstants.USER_DTO_BY_LOGIN_NAME},key = "'user:login-name:' + #loginName")
     @Override
     public UserDto getUserByLoginName(String loginName) {
         User user =  Optional.ofNullable(userRepository.findUserByLoginName(loginName))
                 .orElseThrow (()->new RecordNotFoundException("user name",loginName));
         return modelMapper.map(user,UserDto.class);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserAuthDto getUserAuthByLoginName(String loginName) {
+        User user =  Optional.ofNullable(userRepository.findUserByLoginName(loginName))
+                .orElseThrow (()->new RecordNotFoundException("user name",loginName));
+        UserAuthDto userAuthDto =  modelMapper.map(user,UserAuthDto.class);
+        List<RolePermission> rolePermissions = rolePermissionRepository.findAllByUserId(user.getId());
+        List<Role> roles = roleRepository.findAll(rolePermissions.stream().map(o->o.getRoleId()).collect(Collectors.toList()));
+        userAuthDto.setRoles(roles.stream().map(o->modelMapper.map(o,RoleDto.class)).collect(Collectors.toList()));
+        return userAuthDto;
     }
 
 
@@ -180,7 +200,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = true)
     @Override
     public RoleDto findRoleByRoleName(String roleName) {
         Role role = roleCache.findRoleByName(roleName);
@@ -189,6 +209,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<RoleDto> findRoleByRoleName(Iterable<String> roleNames) {
         return fetchRoles(roleNames).stream().map( role -> modelMapper.map(role,RoleDto.class)).collect(Collectors.toList());
     }

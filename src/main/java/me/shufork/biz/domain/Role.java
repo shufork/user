@@ -1,6 +1,7 @@
 package me.shufork.biz.domain;
 
 import lombok.Data;
+import me.shufork.biz.enums.RoleType;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -38,6 +39,10 @@ public class Role implements Serializable {
 
     @Column(name = "f_enabled",nullable = false)
     private Boolean enabled;
+
+    @Column(name = "f_type",nullable = false,length = 16)
+    @Enumerated(EnumType.STRING)
+    private  RoleType type;
 
     @Column(name = "f_create_by",nullable = false,length = 32)
     private String createBy;

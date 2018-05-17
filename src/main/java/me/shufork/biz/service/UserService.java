@@ -3,6 +3,7 @@ package me.shufork.biz.service;
 import me.shufork.biz.exception.UserExistsException;
 import me.shufork.common.dto.user.CreateUserDto;
 import me.shufork.common.dto.user.RoleDto;
+import me.shufork.common.dto.user.UserAuthDto;
 import me.shufork.common.dto.user.UserDto;
 import me.shufork.common.exceptions.RecordNotFoundException;
 
@@ -43,6 +44,12 @@ public interface UserService {
      */
     UserDto getUserByLoginName(String loginName);
 
+    /**
+     * 根据登录名获取用户认证信息
+     * @param loginName
+     * @return
+     */
+    UserAuthDto getUserAuthByLoginName(String loginName);
 
     /**
      * 设置用户权限(角色)

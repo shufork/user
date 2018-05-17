@@ -27,7 +27,6 @@ public class UiMenuPermission {
     @Column(name = "z_version")
     private Long version;
 
-
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
@@ -35,8 +34,8 @@ public class UiMenuPermission {
     private String id;
 
     @Column(name = "f_role_ref",nullable = false,length = 64)
-    private String role;
+    private String roleId;
 
     @Column(name = "f_menu_ref",nullable = false,length = 64)
-    private String menuResource;
+    private String menuResourceId;
 }
