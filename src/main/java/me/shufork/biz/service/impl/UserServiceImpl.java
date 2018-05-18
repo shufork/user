@@ -6,8 +6,6 @@ import me.shufork.biz.constants.BuildInRoleNames;
 import me.shufork.biz.domain.Role;
 import me.shufork.biz.domain.User;
 import me.shufork.biz.exception.UserExistsException;
-import me.shufork.biz.repository.RolePermissionRepository;
-import me.shufork.biz.repository.RoleRepository;
 import me.shufork.biz.repository.UserRepository;
 import me.shufork.biz.service.PermissionService;
 import me.shufork.biz.service.UserService;
@@ -63,12 +61,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleCache roleCache;
-
-    @Autowired
-    private RolePermissionRepository rolePermissionRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     @Qualifier("userPasswordEncoder")
