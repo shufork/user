@@ -73,7 +73,8 @@ CREATE TABLE `t_role_permission`  (
   `z_created_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP,
   `z_modified_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `z_version` bigint(20) NULL DEFAULT 0,
-  PRIMARY KEY (`f_id`) USING BTREE
+  PRIMARY KEY (`f_id`) USING BTREE,
+  UNIQUE KEY `UK_user_role`(`f_user_ref`,`f_role_ref`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 CREATE INDEX idx_qyr_role_permission ON t_role_permission ( f_user_ref,z_version);

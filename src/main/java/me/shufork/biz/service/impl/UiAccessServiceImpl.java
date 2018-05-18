@@ -24,8 +24,8 @@ public class UiAccessServiceImpl implements UiAccessService {
     @Override
     public List<UiMenuAccessDto> getMenusAccessList(String uid) {
         List<UiMenuAccessDto> list = new LinkedList<>();
-        permissionService.getRolesByUser(uid).forEach(role -> {
-            list.addAll(permissionService.getUiMenuResourcesByRole(role.getId())
+        permissionService.getRolesByUserId(uid).forEach(role -> {
+            list.addAll(permissionService.getUiMenuResourcesByRoleId(role.getId())
                     .stream().map(o->modelMapper.map(o,UiMenuAccessDto.class) )
                     .collect(Collectors.toList()));
         });
@@ -35,8 +35,8 @@ public class UiAccessServiceImpl implements UiAccessService {
     @Override
     public List<ApiAccessDto> getApiAccessList(String uid) {
         List<ApiAccessDto> list = new LinkedList<>();
-        permissionService.getRolesByUser(uid).forEach(role -> {
-            list.addAll(permissionService.getApiResourcesByRole(role.getId())
+        permissionService.getRolesByUserId(uid).forEach(role -> {
+            list.addAll(permissionService.getApiResourcesByRoleId(role.getId())
                     .stream().map(o->modelMapper.map(o,ApiAccessDto.class) )
                     .collect(Collectors.toList()));
         });

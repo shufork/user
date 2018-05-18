@@ -4,11 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import me.shufork.biz.cache.dao.RoleCache;
 import me.shufork.biz.constants.BuildInRoleNames;
 import me.shufork.biz.domain.Role;
-import me.shufork.biz.domain.RolePermission;
 import me.shufork.biz.domain.User;
+import me.shufork.biz.exception.UserExistsException;
 import me.shufork.biz.repository.RolePermissionRepository;
 import me.shufork.biz.repository.RoleRepository;
 import me.shufork.biz.repository.UserRepository;
+import me.shufork.biz.service.PermissionService;
 import me.shufork.biz.service.UserService;
 import me.shufork.common.constants.CacheNameConstants;
 import me.shufork.common.dto.user.CreateUserDto;
@@ -18,6 +19,7 @@ import me.shufork.common.dto.user.UserDto;
 import me.shufork.common.enums.UserStatusEnums;
 import me.shufork.common.exceptions.RecordNotFoundException;
 import me.shufork.common.mq.payload.UserActivatePayload;
+import me.shufork.common.mq.payload.UserCreatedPayload;
 import me.shufork.common.mq.source.UserActivatedSource;
 import me.shufork.common.mq.source.UserCreatedSource;
 import org.modelmapper.ModelMapper;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,10 +56,10 @@ public class UserServiceImpl implements UserService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private UserRepository userRepository;
+    private PermissionService permissionService;
 
-    /*@Autowired
-    private RoleRepository roleRepository;*/
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private RoleCache roleCache;
@@ -66,13 +69,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    /**
-     * Self-autowired reference to proxified bean of this class.
-     */
-    //@Resource
-    //private UserService self;
-
 
     @Autowired
     @Qualifier("userPasswordEncoder")
@@ -88,12 +84,8 @@ public class UserServiceImpl implements UserService {
 
     private final AtomicReference<Role> defaultRole=new AtomicReference<>(null);
 
-    //@PostConstruct
-    private void afterConstruct(){
-        loadDefaultRole();
-    }
 
-    public void loadDefaultRole(){
+    public void refreshDefaultRole(){
         Role role = roleCache.preLoadRole(BuildInRoleNames.ROLE_USER.getValue());
         if(role == null){
             log.error("can not load default role({}) for new user,check database init data ",
@@ -111,29 +103,26 @@ public class UserServiceImpl implements UserService {
     })
     @Override
     public UserDto createUser(CreateUserDto createUserDto) {
-        /*Optional.ofNullable(userRepository.findUserByLoginName(createUserDto.getLoginName()))
+        Optional.ofNullable(userRepository.findUserByLoginName(createUserDto.getLoginName()))
                 .ifPresent(user -> {throw new UserExistsException(user.getLoginName());});
-
-        final RolePermission rolePermission = new RolePermission();
-        rolePermission.setRole(defaultRole.get());
 
         final User user = modelMapper.map(createUserDto,User.class);
 
-        user.setStatus(UserStatus.CREATED);
+        user.setStatus(UserStatusEnums.CREATED);
         user.setPassword(userPasswordEncoder.encode(createUserDto.getPassword()));
-        user.addRoleAuthority(rolePermission);
+
 
         userRepository.save(user);
         assert user.getId() != null;
 
+        permissionService.setRolePermissionsForUser(user.getId(), Arrays.asList(defaultRole.get()) );
+
         final UserCreatedPayload payload = modelMapper.map(user,UserCreatedPayload.class);
         payload.setUserId(user.getId());
         Message<UserCreatedPayload> message = MessageBuilder.withPayload(payload).build();
-
         userCreatedSource.output().send(message);
 
-        return modelMapper.map(user,UserDto.class);*/
-        return null;
+        return modelMapper.map(user,UserDto.class);
     }
 
     @Caching(put = {
@@ -183,8 +172,9 @@ public class UserServiceImpl implements UserService {
         User user =  Optional.ofNullable(userRepository.findUserByLoginName(loginName))
                 .orElseThrow (()->new RecordNotFoundException("user name",loginName));
         UserAuthDto userAuthDto =  modelMapper.map(user,UserAuthDto.class);
-        List<RolePermission> rolePermissions = rolePermissionRepository.findAllByUserId(user.getId());
-        List<Role> roles = roleRepository.findAll(rolePermissions.stream().map(o->o.getRoleId()).collect(Collectors.toList()));
+        List<Role> roles = permissionService.getRolesByUserId(user.getId());
+        /*List<RolePermission> rolePermissions = rolePermissionRepository.findAllByUserId(user.getId());
+        List<Role> roles = roleRepository.findAll(rolePermissions.stream().map(o->o.getRoleId()).collect(Collectors.toList()));*/
         userAuthDto.setRoles(roles.stream().map(o->modelMapper.map(o,RoleDto.class)).collect(Collectors.toList()));
         return userAuthDto;
     }
@@ -265,7 +255,7 @@ public class UserServiceImpl implements UserService {
         private UserServiceImpl userService;
         @Override
         public void onApplicationEvent(ApplicationReadyEvent event) {
-            userService.loadDefaultRole();
+            userService.refreshDefaultRole();
         }
     }
 }
